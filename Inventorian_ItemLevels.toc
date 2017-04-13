@@ -1,0 +1,8 @@
+## Interface: 70200
+## Title: Inventorian ItemLevels
+## Author: Kemayo
+## Notes: Add item levels to Inventorian
+## RequiredDeps: Inventorian
+## Version: 1
+
+addon.lua
