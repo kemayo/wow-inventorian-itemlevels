@@ -24,7 +24,7 @@ inv.Item.prototype.Update = function(self, ...)
 				quality >= LE_ITEM_QUALITY_UNCOMMON and (
 					itemClass == LE_ITEM_CLASS_WEAPON or
 					itemClass == LE_ITEM_CLASS_ARMOR or
-					(itemClass == LE_ITEM_CLASS_GEM and itemSubClass == 11) -- artifact relic
+					(itemClass == LE_ITEM_CLASS_GEM and itemSubClass == LE_ITEM_GEM_ARTIFACTRELIC)
 				)
 			then
 				local r, g, b, hex = GetItemQualityColor(quality)
