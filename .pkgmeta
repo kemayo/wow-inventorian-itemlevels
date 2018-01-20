@@ -1,0 +1,10 @@
+package-as: Inventorian_ItemLevels
+
+externals:
+    lib/LibStub:
+        url: svn://svn.wowace.com/wow/libstub/mainline/trunk
+        tag: latest
+    lib/LibItemUpgradeInfo-1.0: https://repos.wowace.com/wow/libitemupgradeinfo-1-0
+
+ignore:
+    - lib/.gitkeep
