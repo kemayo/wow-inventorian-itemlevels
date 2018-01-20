@@ -1,5 +1,7 @@
 local myname, ns = ...
 
+local IUI = LibStub("LibItemUpgradeInfo-1.0")
+
 local inv = LibStub("AceAddon-3.0"):GetAddon("Inventorian")
 local original_WrapItemButton = inv.Item.WrapItemButton
 inv.Item.WrapItemButton = function(...)
@@ -28,7 +30,9 @@ inv.Item.prototype.Update = function(self, ...)
 				)
 			then
 				local r, g, b, hex = GetItemQualityColor(quality)
-				local itemLevel = select(4, GetItemInfo(link))
+				-- This used to work, but timewalking / post-7.3.5 quest items have a different effective level:
+				-- local itemLevel = select(4, GetItemInfo(link))
+				local itemLevel = IUI:GetUpgradedItemLevel(link)
 				self.ItemLevel:SetFormattedText('|c%s%s|r', hex, itemLevel)
 				self.ItemLevel:Show()
 			end

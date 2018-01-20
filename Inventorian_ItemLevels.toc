@@ -1,8 +1,14 @@
-## Interface: 70200
+## Interface: 70300
 ## Title: Inventorian ItemLevels
 ## Author: Kemayo
 ## Notes: Add item levels to Inventorian
 ## RequiredDeps: Inventorian
+## OptionalDeps: LibItemUpgradeInfo-1.0
 ## Version: 1
+
+#@no-lib-strip@
+lib/LibStub/LibStub.lua
+lib/LibItemUpgradeInfo-1.0/LibItemUpgradeInfo-1.0.xml
+#@end-no-lib-strip@
 
 addon.lua
