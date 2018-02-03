@@ -1,7 +1,5 @@
 local myname, ns = ...
 
-local IUI = LibStub("LibItemUpgradeInfo-1.0")
-
 local inv = LibStub("AceAddon-3.0"):GetAddon("Inventorian")
 local original_WrapItemButton = inv.Item.WrapItemButton
 inv.Item.WrapItemButton = function(...)
@@ -32,7 +30,8 @@ inv.Item.prototype.Update = function(self, ...)
 				local r, g, b, hex = GetItemQualityColor(quality)
 				-- This used to work, but timewalking / post-7.3.5 quest items have a different effective level:
 				-- local itemLevel = select(4, GetItemInfo(link))
-				local itemLevel = IUI:GetUpgradedItemLevel(link)
+				-- local itemLevel = IUI:GetUpgradedItemLevel(link)
+				local itemLevel = ns.ActualItemLevel(link)
 				self.ItemLevel:SetFormattedText('|c%s%s|r', hex, itemLevel)
 				self.ItemLevel:Show()
 			end
@@ -40,4 +39,43 @@ inv.Item.prototype.Update = function(self, ...)
 	end
 
 	return original_Update(self, ...)
+end
+
+do
+	local scanningTooltip, anchor
+	local itemLevelPattern = _G.ITEM_LEVEL:gsub("%%d", "(%%d+)")
+	local cache = {}
+
+	ns.ActualItemLevel = function(itemLink)
+		if not itemLink then return end
+		if not cache[itemLink] then
+			if type(itemLink) == "number" then
+				cache[itemLink] = (select(4, GetItemInfo(itemLink)))
+			else
+				if not scanningTooltip then
+					anchor = CreateFrame("Frame")
+					anchor:Hide()
+					scanningTooltip = _G.CreateFrame("GameTooltip", myname .. "ScanTooltip", nil, "GameTooltipTemplate")
+				end
+				GameTooltip_SetDefaultAnchor(scanningTooltip, anchor)
+				local status, err = pcall(scanningTooltip.SetHyperlink, scanningTooltip, itemLink)
+				if not status then return end
+				for i = 2, 5 do
+					local left = _G[myname .. "ScanTooltipTextLeft" .. i]
+					if left then
+						local text = left:GetText()
+						if text then
+							local level = tonumber(text:match(itemLevelPattern))
+							if level then
+								cache[itemLink] = level
+								break
+							end
+						end
+					end
+				end
+				scanningTooltip:Hide()
+			end
+		end
+		return cache[itemLink]
+	end
 end
