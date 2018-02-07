@@ -31,7 +31,7 @@ inv.Item.prototype.Update = function(self, ...)
 				-- This used to work, but timewalking / post-7.3.5 quest items have a different effective level:
 				-- local itemLevel = select(4, GetItemInfo(link))
 				-- local itemLevel = IUI:GetUpgradedItemLevel(link)
-				local itemLevel = ns.ActualItemLevel(link)
+				local itemLevel = ns.ActualItemLevel(self.bag, self.slot)
 				self.ItemLevel:SetFormattedText('|c%s%s|r', hex, itemLevel)
 				self.ItemLevel:Show()
 			end
@@ -46,8 +46,13 @@ do
 	local itemLevelPattern = _G.ITEM_LEVEL:gsub("%%d", "(%%d+)")
 	local cache = {}
 
-	ns.ActualItemLevel = function(itemLink)
+	ns.ActualItemLevel = function(itemLink, bagSlot)
+		local bagId
 		if not itemLink then return end
+		if bagSlot then
+			bagId = itemLink
+			itemLink = select(7, GetContainerItemInfo(bagId, bagSlot))
+		end
 		if not cache[itemLink] then
 			if type(itemLink) == "number" then
 				cache[itemLink] = (select(4, GetItemInfo(itemLink)))
@@ -58,7 +63,12 @@ do
 					scanningTooltip = _G.CreateFrame("GameTooltip", myname .. "ScanTooltip", nil, "GameTooltipTemplate")
 				end
 				GameTooltip_SetDefaultAnchor(scanningTooltip, anchor)
-				local status, err = pcall(scanningTooltip.SetHyperlink, scanningTooltip, itemLink)
+				local status, err
+				if bagSlot then
+					status, err = pcall(scanningTooltip.SetBagItem, scanningTooltip, bagId, bagSlot)
+				else
+					status, err = pcall(scanningTooltip.SetHyperlink, scanningTooltip, itemLink)
+				end
 				if not status then return end
 				for i = 2, 5 do
 					local left = _G[myname .. "ScanTooltipTextLeft" .. i]
