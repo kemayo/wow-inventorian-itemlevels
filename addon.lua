@@ -32,7 +32,7 @@ inv.Item.prototype.Update = function(self, ...)
 				-- local itemLevel = select(4, GetItemInfo(link))
 				-- local itemLevel = IUI:GetUpgradedItemLevel(link)
 				local itemLevel = ns.ActualItemLevel(self.bag, self.slot)
-				self.ItemLevel:SetFormattedText('|c%s%s|r', hex, itemLevel)
+				self.ItemLevel:SetFormattedText('|c%s%s|r', hex, itemLevel or '?')
 				self.ItemLevel:Show()
 			end
 		end
@@ -64,8 +64,18 @@ do
 				end
 				GameTooltip_SetDefaultAnchor(scanningTooltip, anchor)
 				local status, err
-				if bagSlot then
-					status, err = pcall(scanningTooltip.SetBagItem, scanningTooltip, bagId, bagSlot)
+				if bagId then
+					if bagId == BANK_CONTAINER or bagId == REAGENTBANK_CONTAINER then
+						local id
+						if bagId == BANK_CONTAINER then
+							id = BankButtonIDToInvSlotID(bagSlot)
+						else
+							id = ReagentBankButtonIDToInvSlotID(bagSlot)
+						end
+						status, err = pcall(scanningTooltip.SetInventoryItem, scanningTooltip, "player", id)
+					else
+						status, err = pcall(scanningTooltip.SetBagItem, scanningTooltip, bagId, bagSlot)
+					end
 				else
 					status, err = pcall(scanningTooltip.SetHyperlink, scanningTooltip, itemLink)
 				end
