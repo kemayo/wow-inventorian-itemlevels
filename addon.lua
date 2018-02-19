@@ -30,9 +30,6 @@ inv.Item.prototype.Update = function(self, ...)
 				)
 			then
 				local r, g, b, hex = GetItemQualityColor(quality)
-				-- This used to work, but timewalking / post-7.3.5 quest items have a different effective level:
-				-- local itemLevel = select(4, GetItemInfo(link))
-				-- local itemLevel = IUI:GetUpgradedItemLevel(link)
 				local itemLevel = LIL.GetItemLevel(self.bag, self.slot)
 				self.ItemLevel:SetFormattedText('|c%s%s|r', hex, itemLevel or '?')
 				self.ItemLevel:Show()
