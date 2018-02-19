@@ -3,6 +3,12 @@
 ## Author: Kemayo
 ## Notes: Add item levels to Inventorian
 ## RequiredDeps: Inventorian
+## OptionalDeps: LibItemLevel-1.0
 ## Version: 1
+
+#@no-lib-strip@
+lib/LibStub/LibStub.lua
+lib/LibItemLevel-1.0/LibItemLevel-1.0.xml
+#@end-no-lib-strip@
 
 addon.lua
