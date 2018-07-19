@@ -1,7 +1,5 @@
 local myname, ns = ...
 
-local LIL = LibStub("LibItemLevel-1.0")
-
 local inv = LibStub("AceAddon-3.0"):GetAddon("Inventorian")
 local original_WrapItemButton = inv.Item.WrapItemButton
 inv.Item.WrapItemButton = function(...)
@@ -21,19 +19,21 @@ inv.Item.prototype.Update = function(self, ...)
 		local icon, count, locked, quality, readable, lootable, link, noValue, itemID = self:GetInfo()
 		self.ItemLevel:Hide()
 		if itemID and link then
-			local _, _, _, _, _, itemClass, itemSubClass = GetItemInfoInstant(itemID)
-			if
-				quality >= LE_ITEM_QUALITY_UNCOMMON and (
-					itemClass == LE_ITEM_CLASS_WEAPON or
-					itemClass == LE_ITEM_CLASS_ARMOR or
-					(itemClass == LE_ITEM_CLASS_GEM and itemSubClass == LE_ITEM_GEM_ARTIFACTRELIC)
-				)
-			then
-				local r, g, b, hex = GetItemQualityColor(quality)
-				local itemLevel = LIL.GetItemLevel(self.bag, self.slot)
-				self.ItemLevel:SetFormattedText('|c%s%s|r', hex, itemLevel or '?')
-				self.ItemLevel:Show()
-			end
+			local item = Item:CreateFromBagAndSlot(self.bag, self.slot)
+			item:ContinueOnItemLoad(function()
+				local _, _, _, _, _, itemClass, itemSubClass = GetItemInfoInstant(itemID)
+				if
+					quality >= LE_ITEM_QUALITY_UNCOMMON and (
+						itemClass == LE_ITEM_CLASS_WEAPON or
+						itemClass == LE_ITEM_CLASS_ARMOR or
+						(itemClass == LE_ITEM_CLASS_GEM and itemSubClass == LE_ITEM_GEM_ARTIFACTRELIC)
+					)
+				then
+					local r, g, b, hex = GetItemQualityColor(quality)
+					self.ItemLevel:SetFormattedText('|c%s%s|r', hex, item:GetCurrentItemLevel() or '?')
+					self.ItemLevel:Show()
+				end
+			end)
 		end
 	end
 
