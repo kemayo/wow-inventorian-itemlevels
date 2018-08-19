@@ -3,6 +3,8 @@
 ## Author: Kemayo
 ## Notes: Add item levels to Inventorian
 ## RequiredDeps: Inventorian
+## OptionalDeps: LibAppropriateItems-1.0
 ## Version: 1
 
+embeds.xml
 addon.lua
