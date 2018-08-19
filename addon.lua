@@ -12,11 +12,15 @@ inv.Item.WrapItemButton = function(...)
 	item.ItemLevel:SetFontObject(NumberFontNormal)
 	item.ItemLevel:SetJustifyH('RIGHT')
 
-	item.ItemLevelUpgrade = item:CreateTexture()
-	-- MiniMap-PositionArrowUp?
-	item.ItemLevelUpgrade:SetAtlas("poi-door-arrow-up")
+	item.ItemLevelUpgrade = CreateFrame("FRAME", nil, item)
+	item.ItemLevelUpgrade:SetFrameLevel(4) -- Azerite overlay must be overlaid itself...
 	item.ItemLevelUpgrade:SetSize(8, 8)
 	item.ItemLevelUpgrade:SetPoint('TOPLEFT', 2, -2)
+
+	local texture = item.ItemLevelUpgrade:CreateTexture()
+	-- MiniMap-PositionArrowUp?
+	texture:SetAtlas("poi-door-arrow-up")
+	texture:SetAllPoints()
 
 	return item
 end
