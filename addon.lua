@@ -7,20 +7,21 @@ local original_WrapItemButton = inv.Item.WrapItemButton
 inv.Item.WrapItemButton = function(...)
 	local item = original_WrapItemButton(...)
 
-	item.ItemLevel = item:CreateFontString('$parentItemLevel', 'ARTWORK')
+	local overlayFrame = CreateFrame("FRAME", nil, item)
+	overlayFrame:SetFrameLevel(4) -- Azerite overlay must be overlaid itself...
+	overlayFrame:SetAllPoints()
+
+	item.ItemLevel = overlayFrame:CreateFontString('$parentItemLevel', 'ARTWORK')
 	item.ItemLevel:SetPoint('TOPRIGHT', -2, -2)
 	item.ItemLevel:SetFontObject(NumberFontNormal)
 	item.ItemLevel:SetJustifyH('RIGHT')
 
-	item.ItemLevelUpgrade = CreateFrame("FRAME", nil, item)
-	item.ItemLevelUpgrade:SetFrameLevel(4) -- Azerite overlay must be overlaid itself...
+	item.ItemLevelUpgrade = overlayFrame:CreateTexture(nil, "OVERLAY")
 	item.ItemLevelUpgrade:SetSize(8, 8)
 	item.ItemLevelUpgrade:SetPoint('TOPLEFT', 2, -2)
-
-	local texture = item.ItemLevelUpgrade:CreateTexture()
 	-- MiniMap-PositionArrowUp?
-	texture:SetAtlas("poi-door-arrow-up")
-	texture:SetAllPoints()
+	item.ItemLevelUpgrade:SetAtlas("poi-door-arrow-up")
+
 
 	return item
 end
