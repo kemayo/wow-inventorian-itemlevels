@@ -37,7 +37,7 @@ inv.Item.prototype.Update = function(self, ...)
 			item:ContinueOnItemLoad(function()
 				local _, _, _, equipLoc, _, itemClass, itemSubClass = GetItemInfoInstant(itemID)
 				if
-					quality >= LE_ITEM_QUALITY_UNCOMMON and (
+					quality >= Enum.ItemQuality.Uncommon and (
 						itemClass == LE_ITEM_CLASS_WEAPON or
 						itemClass == LE_ITEM_CLASS_ARMOR or
 						(itemClass == LE_ITEM_CLASS_GEM and itemSubClass == LE_ITEM_GEM_ARTIFACTRELIC)
