@@ -2,64 +2,80 @@ local myname, ns = ...
 
 local LAI = LibStub("LibAppropriateItems-1.0")
 
-local inv = LibStub("AceAddon-3.0"):GetAddon("Inventorian")
-local original_WrapItemButton = inv.Item.WrapItemButton
-inv.Item.WrapItemButton = function(...)
-	local item = original_WrapItemButton(...)
+local inv = LibStub("AceAddon-3.0", true):GetAddon("Inventorian")
 
-	local overlayFrame = CreateFrame("FRAME", nil, item)
+hooksecurefunc(inv.Item, "WrapItemButton", function(self, itemButton)
+	local overlayFrame = CreateFrame("FRAME", nil, itemButton)
 	overlayFrame:SetFrameLevel(4) -- Azerite overlay must be overlaid itself...
 	overlayFrame:SetAllPoints()
 
-	item.ItemLevel = overlayFrame:CreateFontString('$parentItemLevel', 'ARTWORK')
-	item.ItemLevel:SetPoint('TOPRIGHT', -2, -2)
-	item.ItemLevel:SetFontObject(NumberFontNormal)
-	item.ItemLevel:SetJustifyH('RIGHT')
+	itemButton.ItemLevel = overlayFrame:CreateFontString('$parentItemLevel', 'ARTWORK')
+	itemButton.ItemLevel:SetPoint('TOPRIGHT', -2, -2)
+	itemButton.ItemLevel:SetFontObject(NumberFontNormal)
+	itemButton.ItemLevel:SetJustifyH('RIGHT')
 
-	item.ItemLevelUpgrade = overlayFrame:CreateTexture(nil, "OVERLAY")
-	item.ItemLevelUpgrade:SetSize(8, 8)
-	item.ItemLevelUpgrade:SetPoint('TOPLEFT', 2, -2)
+	itemButton.ItemLevelUpgrade = overlayFrame:CreateTexture(nil, "OVERLAY")
+	itemButton.ItemLevelUpgrade:SetSize(8, 8)
+	itemButton.ItemLevelUpgrade:SetPoint('TOPLEFT', 2, -2)
 	-- MiniMap-PositionArrowUp?
-	item.ItemLevelUpgrade:SetAtlas("poi-door-arrow-up")
+	itemButton.ItemLevelUpgrade:SetAtlas("poi-door-arrow-up")
+end)
 
-
-	return item
+local function ToIndex(bag, slot) -- copied from inside Inventorian
+	return (bag < 0 and bag * 100 - slot) or (bag * 100 + slot)
 end
-
-local original_Update = inv.Item.prototype.Update
-inv.Item.prototype.Update = function(self, ...)
-	if self:IsVisible() then
-		local icon, count, locked, quality, readable, lootable, link, noValue, itemID = self:GetInfo()
-		self.ItemLevel:Hide()
-		self.ItemLevelUpgrade:Hide()
-		if itemID and link then
-			local item = Item:CreateFromBagAndSlot(self.bag, self.slot)
-			item:ContinueOnItemLoad(function()
-				local _, _, _, equipLoc, _, itemClass, itemSubClass = GetItemInfoInstant(itemID)
-				if
-					quality >= Enum.ItemQuality.Uncommon and (
-						itemClass == LE_ITEM_CLASS_WEAPON or
-						itemClass == LE_ITEM_CLASS_ARMOR or
-						(itemClass == LE_ITEM_CLASS_GEM and itemSubClass == LE_ITEM_GEM_ARTIFACTRELIC)
-					)
-				then
-					local itemLevel = item:GetCurrentItemLevel()
-					local r, g, b, hex = GetItemQualityColor(quality)
-					self.ItemLevel:SetFormattedText('|c%s%s|r', hex, itemLevel or '?')
-					self.ItemLevel:Show()
-					if LAI:IsAppropriate(itemID) then
-						ns.ForEquippedItems(equipLoc, function(equippedItem)
-							if equippedItem:IsItemEmpty() or equippedItem:GetCurrentItemLevel() < itemLevel then
-								self.ItemLevelUpgrade:Show()
-							end
-						end)
-					end
-				end
-			end)
+local function invContainerUpdateSlot(self, bag, slot)
+	local button = self.items[ToIndex(bag, slot)]
+	if not button then return end
+	if not button:IsVisible() then return end
+	local item
+	local icon, count, locked, quality, readable, lootable, link, noValue, itemID, isBound = button:GetInfo()
+	if button:IsCached() then
+		if link then
+			item = Item:CreateFromItemLink(link)
+		elseif itemID then
+			item = Item:CreateFromItemID(itemID)
 		end
+	else
+		item = Item:CreateFromBagAndSlot(bag, slot)
 	end
-
-	return original_Update(self, ...)
+	button.ItemLevel:Hide()
+	button.ItemLevelUpgrade:Hide()
+	if item:IsItemEmpty() then return end
+	item:ContinueOnItemLoad(function()
+		local itemInfo = item:GetItemLink() or item:GetItemID()
+		local _, _, _, equipLoc, _, itemClass, itemSubClass = GetItemInfoInstant(itemInfo)
+		if
+			quality >= Enum.ItemQuality.Uncommon and (
+				itemClass == Enum.ItemClass.Weapon or
+				itemClass == Enum.ItemClass.Armor or
+				(itemClass == Enum.ItemClass.Gem and itemSubClass == Enum.ItemGemSubclass.Artifactrelic)
+			)
+		then
+			local itemLevel = item:GetCurrentItemLevel()
+			local r, g, b, hex = GetItemQualityColor(quality)
+			button.ItemLevel:SetFormattedText('|c%s%s|r', hex, itemLevel or '?')
+			button.ItemLevel:Show()
+			if LAI:IsAppropriate(itemID) then
+				ns.ForEquippedItems(equipLoc, function(equippedItem)
+					if equippedItem:IsItemEmpty() or equippedItem:GetCurrentItemLevel() < itemLevel then
+						button.ItemLevelUpgrade:Show()
+					end
+				end)
+			end
+		end
+	end)
+end
+local function hookInventorian()
+	hooksecurefunc(inv.bag.itemContainer, "UpdateSlot", invContainerUpdateSlot)
+	hooksecurefunc(inv.bank.itemContainer, "UpdateSlot", invContainerUpdateSlot)
+end
+if inv.bag then
+	hookInventorian()
+else
+	hooksecurefunc(inv, "OnEnable", function()
+		hookInventorian()
+	end)
 end
 
 do
