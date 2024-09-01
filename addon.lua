@@ -46,7 +46,8 @@ local function invContainerUpdateSlot(self, bag, slot)
 		local itemInfo = item:GetItemLink() or item:GetItemID()
 		local _, _, _, equipLoc, _, itemClass, itemSubClass = GetItemInfoInstant(itemInfo)
 		if
-			quality >= Enum.ItemQuality.Uncommon and (
+			-- Mainline has Uncommon, Classic has Good
+			quality >= (Enum.ItemQuality.Uncommon or Enum.ItemQuality.Good) and (
 				itemClass == Enum.ItemClass.Weapon or
 				itemClass == Enum.ItemClass.Armor or
 				(itemClass == Enum.ItemClass.Gem and itemSubClass == Enum.ItemGemSubclass.Artifactrelic)
